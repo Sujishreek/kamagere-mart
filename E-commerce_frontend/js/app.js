@@ -14,7 +14,8 @@ const state = {
   user: loadUser(),
   orders: loadOrders(),
   route: null,
-  checkoutMode: 'cart'
+  checkoutMode: 'cart',
+  ordersRefreshTimer: null
 };
 
 window.addEventListener('DOMContentLoaded', initApp);
@@ -159,6 +160,9 @@ function attachEvents() {
       if (action === 'cancel-product-edit') {
         resetProductForm();
       }
+      if (action === 'cancel-order') {
+        cancelOrder(actionButton.getAttribute('data-order-id'));
+      }
     }
   });
 
@@ -228,6 +232,10 @@ function attachEvents() {
 function setRoute(route, options = {}) {
   state.route = route;
   const target = route || 'home';
+  if (target !== 'orders' && state.ordersRefreshTimer) {
+    clearInterval(state.ordersRefreshTimer);
+    state.ordersRefreshTimer = null;
+  }
   window.location.hash = target === 'home' ? '' : target;
 
   const pageContent = document.getElementById('page-content');
@@ -335,7 +343,7 @@ function renderHome() {
               </div>
               <div class="product-description">${escapeHtml(product.description)}</div>
               <div class="product-actions">
-                <button class="add-cart-btn" data-action="add-cart" data-product-id="${product.id}">Add to Cart</button>
+                ${renderProductCartControl(product)}
                 <button class="buy-now-btn" data-action="buy-now" data-product-id="${product.id}">Buy Now</button>
               </div>
             </div>
@@ -345,6 +353,22 @@ function renderHome() {
     ` : `
       <div class="empty-state">No products match your search. Try a different keyword or category.</div>
     `}
+  `;
+}
+
+function renderProductCartControl(product) {
+  const cartItem = state.cart.find((item) => Number(item.id) === Number(product.id));
+  if (!cartItem || cartItem.quantity <= 0) {
+    return `<button class="add-cart-btn" data-action="add-cart" data-product-id="${product.id}">Add to Cart</button>`;
+  }
+
+  const safeName = escapeHtml(product.name);
+  return `
+    <div class="product-quantity" aria-label="${safeName} quantity in cart">
+      <button type="button" data-action="dec-qty" data-product-id="${product.id}" aria-label="Remove one ${safeName}">−</button>
+      <span aria-live="polite">${cartItem.quantity}</span>
+      <button type="button" data-action="inc-qty" data-product-id="${product.id}" aria-label="Add one ${safeName}">+</button>
+    </div>
   `;
 }
 
@@ -733,6 +757,10 @@ async function renderAdminDashboard() {
 }
 
 function renderOrders() {
+  if (state.ordersRefreshTimer) {
+    clearInterval(state.ordersRefreshTimer);
+    state.ordersRefreshTimer = null;
+  }
   const pageContent = document.getElementById('page-content');
   if (!pageContent) return;
 
@@ -754,21 +782,80 @@ function renderOrders() {
       ${orders.map((order) => `
         <div class="order-card">
           <div class="order-header">
-            <strong>Order ${order.id || 'KM-000'}</strong>
-            <span class="pill">${order.status || 'Confirmed'}</span>
+            <strong>Order ${escapeHtml(order.id || 'KM-000')}</strong>
+            <span class="pill">${escapeHtml(order.status || 'Confirmed')}</span>
           </div>
           <div class="order-meta">
-            ${order.date || 'Today'} · ${order.payment || 'COD'} · ₹${order.total || 0}
+            ${escapeHtml(order.date || 'Today')} · ${escapeHtml(order.payment || 'COD')} · ₹${Number(order.total || 0).toLocaleString('en-IN')}
           </div>
           <div style="margin-top:12px;">
             ${order.items ? order.items.map((item) => `
-              <div class="summary-line"><span>${item.name || item.product?.name} × ${item.quantity || 1}</span><strong>₹${(item.price || item.product?.price || 0) * (item.quantity || 1)}</strong></div>
+              <div class="summary-line"><span>${escapeHtml(item.name || item.product?.name || 'Item')} × ${Number(item.quantity || 1)}</span><strong>₹${(Number(item.price || item.product?.price || 0) * Number(item.quantity || 1)).toLocaleString('en-IN')}</strong></div>
             `).join('') : ''}
           </div>
+          ${order.status === 'Confirmed' && order.cancelToken && Number.isFinite(Number(order.createdAt)) ? `
+            <div class="order-cancel-actions">
+              <button class="outline-btn" type="button" data-action="cancel-order" data-order-id="${escapeHtml(order.id)}">Cancel order</button>
+              <span class="cancel-window" data-cancel-countdown="${escapeHtml(order.id)}"></span>
+            </div>
+          ` : ''}
         </div>
       `).join('')}
     </div>
   `;
+
+  updateOrderCancellationCountdowns();
+  state.ordersRefreshTimer = setInterval(updateOrderCancellationCountdowns, 1000);
+}
+
+function updateOrderCancellationCountdowns() {
+  const ordersById = new Map(state.orders.map((order) => [String(order.id), order]));
+  document.querySelectorAll('[data-action="cancel-order"]').forEach((button) => {
+    const order = ordersById.get(button.getAttribute('data-order-id'));
+    const remainingMs = order ? 2 * 60 * 1000 - (Date.now() - Number(order.createdAt)) : 0;
+    const canCancel = Boolean(order?.cancelToken) && order.status === 'Confirmed' && remainingMs > 0;
+    button.hidden = !canCancel;
+    const countdown = document.querySelector(`[data-cancel-countdown="${CSS.escape(button.getAttribute('data-order-id'))}"]`);
+    if (countdown) {
+      const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+      countdown.textContent = canCancel
+        ? `Cancel available for ${Math.floor(remainingSeconds / 60)}:${String(remainingSeconds % 60).padStart(2, '0')}`
+        : 'Cancellation window expired';
+    }
+  });
+}
+
+async function cancelOrder(orderId) {
+  const order = state.orders.find((item) => String(item.id) === String(orderId));
+  if (!order?.cancelToken) {
+    showToast('Cancellation details are not available for this order');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/api/orders/${encodeURIComponent(order.id)}/cancel`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cancelToken: order.cancelToken })
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      if (response.status === 410) {
+        order.cancelToken = '';
+        localStorage.setItem(ORDERS_KEY, JSON.stringify(state.orders));
+        renderOrders();
+      }
+      throw new Error(result.message || 'Unable to cancel order.');
+    }
+
+    order.status = result.status || 'Cancelled';
+    order.cancelToken = '';
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(state.orders));
+    showToast('Order cancelled successfully');
+    renderOrders();
+  } catch (error) {
+    showToast(error.message || 'Unable to cancel order.');
+  }
 }
 
 function renderProfile() {
@@ -1171,6 +1258,7 @@ function addToCart(productId) {
 
   saveCart();
   updateCartBadge();
+  renderHome();
   showToast(`${product.name} added to cart`);
 }
 
@@ -1185,7 +1273,11 @@ function adjustCartQuantity(productId, change) {
 
   saveCart();
   updateCartBadge();
-  renderCart();
+  if (state.route === 'home') {
+    renderHome();
+  } else {
+    renderCart();
+  }
 }
 
 function removeCartItem(productId) {

@@ -346,6 +346,34 @@ img { max-width: 100%; display: block; }
   cursor: pointer;
 }
 
+.product-quantity {
+  display: flex;
+  flex: 1;
+  min-width: 108px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--green);
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+  color: var(--green-dark);
+}
+
+.product-actions .product-quantity button {
+  flex: 0 0 36px;
+  min-height: 38px;
+  padding: 6px;
+  background: var(--green-soft);
+  color: var(--green-dark);
+  font-size: 1.1rem;
+}
+
+.product-quantity span {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 800;
+}
+
 .add-cart-btn {
   background: var(--green-soft);
   color: var(--green-dark);
@@ -724,6 +752,19 @@ textarea {
 .order-meta {
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.order-cancel-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.cancel-window {
+  color: var(--muted);
+  font-size: 0.85rem;
 }
 
 .profile-box {

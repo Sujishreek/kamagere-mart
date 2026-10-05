@@ -129,6 +129,10 @@ shows the selected point on Google Maps, and adds a Google Maps link to the
 delivery address. Browser geolocation requires HTTPS or localhost; customers
 can always enter their address manually.
 
+Product cards show inline plus/minus controls after an item is added to the
+cart. Each newly placed order can be cancelled from the Orders page for two
+minutes; cancellation is verified and time-limited by the backend.
+
 
 ## Authentication validation
 

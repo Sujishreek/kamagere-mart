@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const path = require("path");
 const { DatabaseSync } = require("node:sqlite");
 const mysql = require("mysql2/promise");
@@ -237,9 +238,19 @@ async function initializeDatabase() {
                 payment VARCHAR(64) NOT NULL DEFAULT 'COD',
                 status VARCHAR(64) NOT NULL DEFAULT 'Confirmed',
                 source VARCHAR(64) NOT NULL DEFAULT 'Cart',
+                createdAt BIGINT NULL,
+                cancelTokenHash CHAR(64) NULL,
                 INDEX orders_user_id (userId)
             ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
         `);
+        const [orderColumns] = await db.query("SHOW COLUMNS FROM orders");
+        const orderColumnNames = new Set(orderColumns.map((column) => column.Field));
+        if (!orderColumnNames.has("createdAt")) {
+            await db.query("ALTER TABLE orders ADD COLUMN createdAt BIGINT NULL");
+        }
+        if (!orderColumnNames.has("cancelTokenHash")) {
+            await db.query("ALTER TABLE orders ADD COLUMN cancelTokenHash CHAR(64) NULL");
+        }
         await db.query(`
             CREATE TABLE IF NOT EXISTS products (
                 id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -295,7 +306,9 @@ async function initializeDatabase() {
             address TEXT NOT NULL,
             payment TEXT NOT NULL DEFAULT 'COD',
             status TEXT NOT NULL DEFAULT 'Confirmed',
-            source TEXT NOT NULL DEFAULT 'Cart'
+            source TEXT NOT NULL DEFAULT 'Cart',
+            createdAt INTEGER,
+            cancelTokenHash TEXT
         );
 
         CREATE TABLE IF NOT EXISTS products (
@@ -310,6 +323,16 @@ async function initializeDatabase() {
             description TEXT NOT NULL
         );
     `);
+
+    const sqliteOrderColumns = new Set(
+        db.prepare("PRAGMA table_info(orders)").all().map((column) => column.name)
+    );
+    if (!sqliteOrderColumns.has("createdAt")) {
+        db.exec("ALTER TABLE orders ADD COLUMN createdAt INTEGER");
+    }
+    if (!sqliteOrderColumns.has("cancelTokenHash")) {
+        db.exec("ALTER TABLE orders ADD COLUMN cancelTokenHash TEXT");
+    }
 
     for (const product of PRODUCTS) {
         db.prepare(`
@@ -782,10 +805,15 @@ app.post("/api/orders", async (req, res) => {
             (pricedItems.reduce((sum, item) => sum + item.price * item.quantity, 0) + Number.EPSILON) * 100
         ) / 100;
         const orderDelivery = orderSubtotal > 99 ? 0 : 25;
+        const createdAt = Date.now();
+        const cancelToken = crypto.randomBytes(32).toString("hex");
+        const cancelTokenHash = crypto.createHash("sha256").update(cancelToken).digest("hex");
         const order = {
             id: "KM" + Date.now().toString().slice(-7),
             userId: userId || null,
             date: new Date().toLocaleString("en-IN"),
+            createdAt,
+            cancelToken,
             items: pricedItems,
             subtotal: orderSubtotal,
             delivery: orderDelivery,
@@ -797,8 +825,8 @@ app.post("/api/orders", async (req, res) => {
         };
 
         await runDb(
-            `INSERT INTO orders (id, userId, date, items, subtotal, delivery, total, address, payment, status, source)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO orders (id, userId, date, items, subtotal, delivery, total, address, payment, status, source, createdAt, cancelTokenHash)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 order.id,
                 order.userId,
@@ -810,7 +838,9 @@ app.post("/api/orders", async (req, res) => {
                 order.address,
                 order.payment,
                 order.status,
-                order.source
+                order.source,
+                order.createdAt,
+                cancelTokenHash
             ]
         );
 
@@ -825,6 +855,56 @@ app.post("/api/orders", async (req, res) => {
         res.status(500).json({
             message: "Server error"
         });
+    }
+});
+
+app.patch("/api/orders/:id/cancel", async (req, res) => {
+    try {
+        const orderId = String(req.params.id || "");
+        const cancelToken = String(req.body.cancelToken || "");
+        if (!orderId || !/^[a-f0-9]{64}$/i.test(cancelToken)) {
+            return res.status(400).json({ message: "A valid order cancellation token is required." });
+        }
+
+        const row = await getDb(
+            "SELECT status, createdAt, cancelTokenHash FROM orders WHERE id = ?",
+            [orderId]
+        );
+        if (!row) {
+            return res.status(404).json({ message: "Order not found." });
+        }
+        if (!row.cancelTokenHash || !/^[a-f0-9]{64}$/i.test(String(row.cancelTokenHash))) {
+            return res.status(403).json({ message: "This order cannot be cancelled from this browser." });
+        }
+
+        const suppliedHash = crypto.createHash("sha256").update(cancelToken).digest();
+        const storedHash = Buffer.from(String(row.cancelTokenHash), "hex");
+        if (!crypto.timingSafeEqual(suppliedHash, storedHash)) {
+            return res.status(403).json({ message: "This order cannot be cancelled from this browser." });
+        }
+        if (row.status !== "Confirmed") {
+            return res.status(409).json({ message: "This order has already been processed and cannot be cancelled." });
+        }
+
+        const createdAt = Number(row.createdAt);
+        const ageMs = Date.now() - createdAt;
+        if (!Number.isFinite(createdAt) || ageMs < 0 || ageMs >= 2 * 60 * 1000) {
+            return res.status(410).json({ message: "The 2-minute cancellation window has expired." });
+        }
+
+        const result = await runDb(
+            `UPDATE orders SET status = 'Cancelled'
+             WHERE id = ? AND status = 'Confirmed' AND createdAt = ? AND cancelTokenHash = ?`,
+            [orderId, createdAt, String(row.cancelTokenHash)]
+        );
+        if (result.changes !== 1) {
+            return res.status(409).json({ message: "This order has already been processed and cannot be cancelled." });
+        }
+
+        res.json({ message: "Order cancelled successfully.", status: "Cancelled" });
+    } catch (error) {
+        console.error("Cancel Order Error:", error);
+        res.status(500).json({ message: "Unable to cancel order." });
     }
 });
 

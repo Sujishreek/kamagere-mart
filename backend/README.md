@@ -20,3 +20,7 @@ For a one-time migration of a local SQLite database, start the Cloud SQL Auth
 Proxy on port 3307 and run `node migrate-sqlite-to-cloudsql.js` with
 `DB_PASSWORD` set. The migration stops if either Cloud SQL table is nonempty,
 so it will not silently merge or overwrite existing records.
+
+Orders can be cancelled using their per-order token for two minutes after
+placement. The backend stores only the token hash and rejects cancellation
+after the deadline or after an order has already changed status.
