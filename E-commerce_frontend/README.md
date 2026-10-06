@@ -150,6 +150,10 @@ Admin login requires backend environment variables. Copy `backend/.env.example` 
 The frontend customer login now uses email + password. Customer registration still collects a phone number and validates it as a 10-digit Indian mobile number.
 
 Admin authentication is intentionally handled by the backend rather than hard-coded in frontend JavaScript.
+The header account menu shows only **Sign in** when signed out. After login it
+provides **My profile**, **Home**, **Orders**, **Contact**, and **FAQs**. Admins
+use the same login form; successful admin credentials open the Admin dashboard.
+The Contact page currently displays the store number `91+ 0000000000`.
 
 In the Admin dashboard, select a product's **Edit** button to update its
 details. The product photo input opens the rear camera on supported phones or

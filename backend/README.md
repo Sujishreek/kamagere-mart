@@ -7,6 +7,11 @@ for MySQL, set `INSTANCE_CONNECTION_NAME`, `DB_USER`, `DB_PASSWORD`, and
 Admin login issues an eight-hour JWT, and the orders API requires that admin
 token. Configure `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `ADMIN_JWT_SECRET`; keep
 the password and signing secret in Secret Manager when deployed.
+Google sign-in requires a Google OAuth web client ID in `GOOGLE_CLIENT_ID`.
+Configure the app's local and deployed hostnames as authorized JavaScript
+origins in Google Cloud Console. Google ID tokens are verified by the backend;
+Google-only accounts are created without a phone number; checkout asks for a
+contact number when it is needed.
 Authenticated admins can add products from the Admin dashboard. Products are
 stored in the `products` table and served by `/api/products`.
 Admins can also select a product to edit and update its details. The product

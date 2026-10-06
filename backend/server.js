@@ -8,9 +8,12 @@ const crypto = require("crypto");
 const path = require("path");
 const { DatabaseSync } = require("node:sqlite");
 const mysql = require("mysql2/promise");
+const { OAuth2Client } = require("google-auth-library");
 const PRODUCTS = require("./product");
 
 const app = express();
+const googleAuthClient = new OAuth2Client();
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
 const frontendCandidates = [
     path.join(__dirname, "..", "E-commerce_frontend"),
     path.join(__dirname, "E-commerce_frontend"),
@@ -220,11 +223,12 @@ async function initializeDatabase() {
                 id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
                 email VARCHAR(254) NOT NULL UNIQUE,
-                phone VARCHAR(20) NOT NULL UNIQUE,
-                password VARCHAR(255) NOT NULL,
+                phone VARCHAR(20) NULL UNIQUE,
+                password VARCHAR(255) NULL,
                 address TEXT NOT NULL
             ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
         `);
+        await db.query("ALTER TABLE users MODIFY phone VARCHAR(20) NULL, MODIFY password VARCHAR(255) NULL");
         await db.query(`
             CREATE TABLE IF NOT EXISTS orders (
                 id VARCHAR(32) NOT NULL PRIMARY KEY,
@@ -290,8 +294,8 @@ async function initializeDatabase() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
-            phone TEXT NOT NULL UNIQUE,
-            password TEXT NOT NULL,
+            phone TEXT UNIQUE,
+            password TEXT,
             address TEXT DEFAULT ''
         );
 
@@ -323,6 +327,26 @@ async function initializeDatabase() {
             description TEXT NOT NULL
         );
     `);
+
+    const sqliteUserColumns = db.prepare("PRAGMA table_info(users)").all();
+    if (sqliteUserColumns.some((column) => ["phone", "password"].includes(column.name) && column.notnull)) {
+        db.exec(`
+            BEGIN;
+            ALTER TABLE users RENAME TO users_legacy;
+            CREATE TABLE users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
+                phone TEXT UNIQUE,
+                password TEXT,
+                address TEXT DEFAULT ''
+            );
+            INSERT INTO users (id, name, email, phone, password, address)
+            SELECT id, name, email, phone, password, address FROM users_legacy;
+            DROP TABLE users_legacy;
+            COMMIT;
+        `);
+    }
 
     const sqliteOrderColumns = new Set(
         db.prepare("PRAGMA table_info(orders)").all().map((column) => column.name)
@@ -479,6 +503,70 @@ app.put("/api/products/:id", requireAdmin, async (req, res) => {
 // Register API
 // ===============================
 
+app.get("/api/auth/google/config", (req, res) => {
+    res.json({ clientId: GOOGLE_CLIENT_ID || null });
+});
+
+app.post("/api/auth/google", async (req, res) => {
+    if (!GOOGLE_CLIENT_ID) {
+        return res.status(503).json({
+            message: "Google sign-in is not configured. Set GOOGLE_CLIENT_ID on the server."
+        });
+    }
+
+    const credential = String(req.body?.credential || "");
+    if (!credential || credential.length > 12000) {
+        return res.status(400).json({ message: "A valid Google credential is required." });
+    }
+
+    let googleUser;
+    try {
+        const ticket = await googleAuthClient.verifyIdToken({
+            idToken: credential,
+            audience: GOOGLE_CLIENT_ID
+        });
+        googleUser = ticket.getPayload();
+    } catch (error) {
+        console.error("Google credential verification error:", error);
+        return res.status(401).json({ message: "Unable to verify your Google account." });
+    }
+
+    if (!googleUser?.sub || !googleUser.email || googleUser.email_verified !== true) {
+        return res.status(401).json({ message: "Google did not provide a verified email address." });
+    }
+
+    try {
+        let userRow = await getDb(
+            "SELECT * FROM users WHERE LOWER(email) = LOWER(?)",
+            [googleUser.email]
+        );
+
+        if (!userRow) {
+            const name = String(googleUser.name || googleUser.email.split("@")[0]).slice(0, 255);
+            const insertResult = await runDb(
+                "INSERT INTO users (name, email, phone, password, address) VALUES (?, ?, NULL, NULL, ?)",
+                [name, googleUser.email, ""]
+            );
+            userRow = await getDb("SELECT * FROM users WHERE id = ?", [insertResult.lastID]);
+        }
+
+        const user = normalizeUserRow(userRow);
+        return res.json({
+            message: "Google sign-in successful",
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                address: user.address
+            }
+        });
+    } catch (error) {
+        console.error("Google account sign-in error:", error);
+        return res.status(500).json({ message: "Unable to sign in with your Google account." });
+    }
+});
+
 app.post("/api/register", async (req, res) => {
     try {
         const {
@@ -597,7 +685,7 @@ app.post("/api/login", async (req, res) => {
         }
 
         const user = normalizeUserRow(userRow);
-        const passwordMatch = await bcrypt.compare(
+        const passwordMatch = Boolean(user.password) && await bcrypt.compare(
             password,
             user.password
         );

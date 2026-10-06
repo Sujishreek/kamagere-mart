@@ -5,6 +5,204 @@ const USER_KEY = 'km_user';
 const ORDERS_KEY = 'km_orders';
 const ADMIN_TOKEN_KEY = 'km_admin_token';
 const ADMIN_EMAIL_KEY = 'km_admin_email';
+const LANGUAGE_KEY = 'km_language';
+const REGISTRATION_PROMPT_KEY = 'km_registration_prompt_shown';
+
+const KN_TRANSLATIONS = {
+  Home: 'ಮುಖಪುಟ',
+  Orders: 'ಆರ್ಡರ್‌ಗಳು',
+  Login: 'ಲಾಗಿನ್',
+  Admin: 'ನಿರ್ವಾಹಕ',
+  Profile: 'ಪ್ರೊಫೈಲ್',
+  Menu: 'ಮೆನು',
+  'My profile': 'ನನ್ನ ಪ್ರೊಫೈಲ್',
+  Contact: 'ಸಂಪರ್ಕಿಸಿ',
+  FAQs: 'ಸಾಮಾನ್ಯ ಪ್ರಶ್ನೆಗಳು',
+  'Contact us': 'ನಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸಿ',
+  'For help with shopping or orders, call our store:': 'ಖರೀದಿ ಅಥವಾ ಆರ್ಡರ್‌ಗಳ ಸಹಾಯಕ್ಕಾಗಿ ನಮ್ಮ ಅಂಗಡಿಗೆ ಕರೆಮಾಡಿ:',
+  '91+ 0000000000': '91+ 0000000000',
+  'Frequently asked questions': 'ಪದೇ ಪದೇ ಕೇಳಲಾಗುವ ಪ್ರಶ್ನೆಗಳು',
+  'How do I place an order?': 'ನಾನು ಆರ್ಡರ್ ಹೇಗೆ ಮಾಡುವುದು?',
+  'Add items to your cart, then continue to checkout and submit your delivery details.': 'ವಸ್ತುಗಳನ್ನು ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಿ, ಚೆಕ್‌ಔಟ್‌ಗೆ ಮುಂದುವರಿದು ವಿತರಣಾ ವಿವರಗಳನ್ನು ಸಲ್ಲಿಸಿ.',
+  'What payment methods are available?': 'ಯಾವ ಪಾವತಿ ವಿಧಾನಗಳು ಲಭ್ಯವಿವೆ?',
+  'Choose Cash on Delivery or UPI at checkout.': 'ಚೆಕ್‌ಔಟ್‌ನಲ್ಲಿ ವಿತರಣೆ ವೇಳೆ ನಗದು ಅಥವಾ UPI ಆಯ್ಕೆಮಾಡಿ.',
+  'Can I cancel an order?': 'ನಾನು ಆರ್ಡರ್ ರದ್ದುಮಾಡಬಹುದೇ?',
+  'You can cancel a confirmed order from Orders within two minutes after placing it.': 'ಆರ್ಡರ್ ಮಾಡಿದ ಎರಡು ನಿಮಿಷಗಳೊಳಗೆ ಆರ್ಡರ್‌ಗಳ ಪುಟದಿಂದ ದೃಢೀಕರಿಸಿದ ಆರ್ಡರ್ ರದ್ದುಮಾಡಬಹುದು.',
+  'How much is delivery?': 'ವಿತರಣಾ ಶುಲ್ಕ ಎಷ್ಟು?',
+  'Delivery is free for orders above ₹99; otherwise the fee is ₹25.': '₹99 ಕ್ಕಿಂತ ಹೆಚ್ಚಿನ ಆರ್ಡರ್‌ಗಳಿಗೆ ಉಚಿತ ವಿತರಣೆ; ಇಲ್ಲದಿದ್ದರೆ ಶುಲ್ಕ ₹25.',
+  'Fresh groceries at your doorstep': 'ತಾಜಾ ದಿನಸಿ ನಿಮ್ಮ ಮನೆಬಾಗಿಲಿಗೆ',
+  'Everything your kitchen needs, delivered fast.': 'ನಿಮ್ಮ ಅಡುಗೆಮನೆಗೆ ಬೇಕಾದ ಎಲ್ಲವೂ, ವೇಗವಾಗಿ ಮನೆಗೆ ತಲುಪಿಸಲಾಗುತ್ತದೆ.',
+  'Shop staples, dairy, fruits, snacks and household essentials with same-day delivery in your city.': 'ದಿನಸಿ, ಹಾಲಿನ ಉತ್ಪನ್ನಗಳು, ಹಣ್ಣುಗಳು, ತಿಂಡಿಗಳು ಮತ್ತು ಗೃಹೋಪಯೋಗಿ ವಸ್ತುಗಳನ್ನು ಅದೇ ದಿನದ ವಿತರಣೆಯೊಂದಿಗೆ ಖರೀದಿಸಿ.',
+  'Go to cart': 'ಕಾರ್ಟ್‌ಗೆ ಹೋಗಿ',
+  'View orders': 'ಆರ್ಡರ್‌ಗಳನ್ನು ನೋಡಿ',
+  'Why shop with us?': 'ನಮ್ಮಲ್ಲಿ ಏಕೆ ಖರೀದಿಸಬೇಕು?',
+  'Fresh Picks': 'ತಾಜಾ ಆಯ್ಕೆಗಳು',
+  Cart: 'ಕಾರ್ಟ್',
+  Delivery: 'ವಿತರಣೆ',
+  Offers: 'ಆಫರ್‌ಗಳು',
+  Saved: 'ಉಳಿತಾಯ',
+  '30 min': '30 ನಿಮಿಷ',
+  'Up to 30%': '30% ವರೆಗೆ',
+  'Search products': 'ಉತ್ಪನ್ನಗಳನ್ನು ಹುಡುಕಿ',
+  'Search vegetables, dairy, atta...': 'ತರಕಾರಿಗಳು, ಹಾಲಿನ ಉತ್ಪನ್ನಗಳು, ಹಿಟ್ಟು ಹುಡುಕಿ...',
+  'Add to cart': 'ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಿ',
+  'Buy now': 'ಈಗಲೇ ಖರೀದಿಸಿ',
+  'Your cart': 'ನಿಮ್ಮ ಕಾರ್ಟ್',
+  'Continue shopping': 'ಖರೀದಿ ಮುಂದುವರಿಸಿ',
+  'Proceed to checkout': 'ಚೆಕ್‌ಔಟ್‌ಗೆ ಮುಂದುವರಿಯಿರಿ',
+  'Your cart is empty.': 'ನಿಮ್ಮ ಕಾರ್ಟ್ ಖಾಲಿಯಾಗಿದೆ.',
+  Subtotal: 'ಉಪಮೊತ್ತ',
+  Total: 'ಒಟ್ಟು',
+  'Delivery fee': 'ವಿತರಣಾ ಶುಲ್ಕ',
+  'Free delivery on orders above ₹99; otherwise ₹25.': '₹99 ಕ್ಕಿಂತ ಹೆಚ್ಚಿನ ಆರ್ಡರ್‌ಗಳಿಗೆ ಉಚಿತ ವಿತರಣೆ; ಇಲ್ಲದಿದ್ದರೆ ₹25.',
+  Checkout: 'ಚೆಕ್‌ಔಟ್',
+  'Delivery address': 'ವಿತರಣಾ ವಿಳಾಸ',
+  'Use my current location': 'ನನ್ನ ಪ್ರಸ್ತುತ ಸ್ಥಳ ಬಳಸಿ',
+  'Payment method': 'ಪಾವತಿ ವಿಧಾನ',
+  'Place order': 'ಆರ್ಡರ್ ಮಾಡಿ',
+  'Cash on delivery': 'ವಿತರಣೆ ವೇಳೆ ನಗದು',
+  'Order placed successfully': 'ಆರ್ಡರ್ ಯಶಸ್ವಿಯಾಗಿ ಮಾಡಲಾಗಿದೆ',
+  'Order history': 'ಆರ್ಡರ್ ಇತಿಹಾಸ',
+  'No orders yet.': 'ಇನ್ನೂ ಯಾವುದೇ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ.',
+  'Order details': 'ಆರ್ಡರ್ ವಿವರಗಳು',
+  Cancel: 'ರದ್ದುಮಾಡಿ',
+  'Cancel order': 'ಆರ್ಡರ್ ರದ್ದುಮಾಡಿ',
+  'My profile': 'ನನ್ನ ಪ್ರೊಫೈಲ್',
+  Name: 'ಹೆಸರು',
+  Email: 'ಇಮೇಲ್',
+  Phone: 'ಫೋನ್',
+  Address: 'ವಿಳಾಸ',
+  Logout: 'ಲಾಗ್‌ಔಟ್',
+  'Login successful': 'ಲಾಗಿನ್ ಯಶಸ್ವಿಯಾಗಿದೆ',
+  'Registration successful': 'ನೋಂದಣಿ ಯಶಸ್ವಿಯಾಗಿದೆ',
+  'Create account': 'ಖಾತೆ ರಚಿಸಿ',
+  'Customer benefits': 'ಗ್ರಾಹಕರ ಪ್ರಯೋಜನಗಳು',
+  'Full name': 'ಪೂರ್ಣ ಹೆಸರು',
+  Password: 'ಪಾಸ್‌ವರ್ಡ್',
+  Register: 'ನೋಂದಣಿ ಮಾಡಿ',
+  'Need an account? Register': 'ಖಾತೆ ಬೇಕೇ? ನೋಂದಣಿ ಮಾಡಿ',
+  'Already have an account?': 'ಈಗಾಗಲೇ ಖಾತೆ ಇದೆಯೇ?',
+  'Already a member? Login': 'ಈಗಾಗಲೇ ಸದಸ್ಯರೇ? ಲಾಗಿನ್ ಮಾಡಿ',
+  'Sign in to continue shopping.': 'ಖರೀದಿ ಮುಂದುವರಿಸಲು ಸೈನ್ ಇನ್ ಮಾಡಿ.',
+  'Track all orders in one place': 'ಎಲ್ಲಾ ಆರ್ಡರ್‌ಗಳನ್ನು ಒಂದೇ ಸ್ಥಳದಲ್ಲಿ ಗಮನಿಸಿ',
+  'Save delivery addresses': 'ವಿತರಣಾ ವಿಳಾಸಗಳನ್ನು ಉಳಿಸಿ',
+  'Early access to offers and discounts': 'ಆಫರ್‌ಗಳು ಮತ್ತು ರಿಯಾಯಿತಿಗಳಿಗೆ ಮುಂಚಿತ ಪ್ರವೇಶ',
+  'Fast checkout for repeated shopping': 'ಮರುಖರೀದಿಗೆ ವೇಗದ ಚೆಕ್‌ಔಟ್',
+  'Preferred language': 'ಆದ್ಯತೆಯ ಭಾಷೆ',
+  English: 'ಇಂಗ್ಲಿಷ್',
+  'Continue with Google': 'Google ಮೂಲಕ ಮುಂದುವರಿಯಿರಿ',
+  'Sign in with Google': 'Google ಮೂಲಕ ಸೈನ್ ಇನ್ ಮಾಡಿ',
+  'Google sign-in is not configured yet. Set GOOGLE_CLIENT_ID on the server.': 'Google ಸೈನ್-ಇನ್ ಇನ್ನೂ ಹೊಂದಿಸಲಾಗಿಲ್ಲ. ಸರ್ವರ್‌ನಲ್ಲಿ GOOGLE_CLIENT_ID ಹೊಂದಿಸಿ.',
+  'Create your account': 'ನಿಮ್ಮ ಖಾತೆ ರಚಿಸಿ',
+  'Register for a Kamagere Mart account': 'ಕಾಮಗೆರೆ ಮಾರ್ಟ್ ಖಾತೆಗೆ ನೋಂದಣಿ ಮಾಡಿ',
+  'Close': 'ಮುಚ್ಚಿ',
+  'Fresh essentials delivered': 'ತಾಜಾ ಅಗತ್ಯ ವಸ್ತುಗಳು ಮನೆಗೆ',
+  'All': 'ಎಲ್ಲಾ',
+  'Vegetables': 'ತರಕಾರಿಗಳು',
+  'Fruits': 'ಹಣ್ಣುಗಳು',
+  'Dairy': 'ಹಾಲಿನ ಉತ್ಪನ್ನಗಳು',
+  'Atta & Rice': 'ಹಿಟ್ಟು ಮತ್ತು ಅಕ್ಕಿ',
+  Staples: 'ದೈನಂದಿನ ಅಗತ್ಯ ವಸ್ತುಗಳು',
+  'Cooking Oil': 'ಅಡುಗೆ ಎಣ್ಣೆ',
+  'Groceries': 'ದಿನಸಿ',
+  'Snacks': 'ತಿಂಡಿಗಳು',
+  'Household': 'ಮನೆಯ ಬಳಕೆಯ ವಸ್ತುಗಳು',
+  'Loading...': 'ಲೋಡ್ ಆಗುತ್ತಿದೆ...',
+  'Something went wrong. Please try again.': 'ಏನೋ ತಪ್ಪಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+  'Buy Now': 'ಈಗಲೇ ಖರೀದಿಸಿ',
+  'Add to Cart': 'ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಿ',
+  'No products match your search. Try a different keyword or category.': 'ನಿಮ್ಮ ಹುಡುಕಾಟಕ್ಕೆ ಯಾವುದೇ ಉತ್ಪನ್ನಗಳು ಹೊಂದಿಕೆಯಾಗಿಲ್ಲ. ಬೇರೆ ಪದ ಅಥವಾ ವರ್ಗವನ್ನು ಪ್ರಯತ್ನಿಸಿ.',
+  'Your cart is empty': 'ನಿಮ್ಮ ಕಾರ್ಟ್ ಖಾಲಿಯಾಗಿದೆ',
+  'Browse groceries and add items to start your order.': 'ದಿನಸಿ ವಸ್ತುಗಳನ್ನು ನೋಡಿ ಮತ್ತು ಆರ್ಡರ್ ಆರಂಭಿಸಲು ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಿ.',
+  'Shopping cart': 'ಖರೀದಿ ಕಾರ್ಟ್',
+  Remove: 'ತೆಗೆದುಹಾಕಿ',
+  'No items to checkout': 'ಚೆಕ್‌ಔಟ್ ಮಾಡಲು ಯಾವುದೇ ವಸ್ತುಗಳಿಲ್ಲ',
+  'Add products': 'ಉತ್ಪನ್ನಗಳನ್ನು ಸೇರಿಸಿ',
+  'Delivery details': 'ವಿತರಣೆಯ ವಿವರಗಳು',
+  'Allow location access to show your delivery point on Google Maps.': 'Google Maps‌ನಲ್ಲಿ ನಿಮ್ಮ ವಿತರಣಾ ಸ್ಥಳವನ್ನು ತೋರಿಸಲು ಸ್ಥಳ ಅನುಮತಿ ನೀಡಿ.',
+  'Open in Google Maps': 'Google Maps‌ನಲ್ಲಿ ತೆರೆಯಿರಿ',
+  'Order source': 'ಆರ್ಡರ್ ಮೂಲ',
+  'Order summary': 'ಆರ್ಡರ್ ಸಾರಾಂಶ',
+  'Cash on Delivery': 'ವಿತರಣೆ ವೇಳೆ ನಗದು',
+  'No orders yet': 'ಇನ್ನೂ ಯಾವುದೇ ಆರ್ಡರ್‌ಗಳಿಲ್ಲ',
+  'Place your first order and it will appear here.': 'ನಿಮ್ಮ ಮೊದಲ ಆರ್ಡರ್ ಮಾಡಿ; ಅದು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ.',
+  'Start shopping': 'ಖರೀದಿ ಪ್ರಾರಂಭಿಸಿ',
+  'Could not load admin dashboard': 'ನಿರ್ವಾಹಕ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ',
+  'No orders have been placed yet.': 'ಇನ್ನೂ ಯಾವುದೇ ಆರ್ಡರ್‌ಗಳನ್ನು ಮಾಡಿಲ್ಲ.',
+  'Sign in': 'ಸೈನ್ ಇನ್',
+  'Back to store': 'ಅಂಗಡಿಗೆ ಹಿಂತಿರುಗಿ',
+  'Store management': 'ಅಂಗಡಿ ನಿರ್ವಹಣೆ',
+  'Admin dashboard': 'ನಿರ್ವಾಹಕ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',
+  'Sign out': 'ಸೈನ್ ಔಟ್',
+  'Total orders': 'ಒಟ್ಟು ಆರ್ಡರ್‌ಗಳು',
+  'Order value': 'ಆರ್ಡರ್ ಮೌಲ್ಯ',
+  Products: 'ಉತ್ಪನ್ನಗಳು',
+  'Add a product': 'ಉತ್ಪನ್ನ ಸೇರಿಸಿ',
+  'New products are saved to the store database and appear in the storefront catalog.': 'ಹೊಸ ಉತ್ಪನ್ನಗಳನ್ನು ಅಂಗಡಿ ಡೇಟಾಬೇಸ್‌ನಲ್ಲಿ ಉಳಿಸಿ, ಅಂಗಡಿ ಪಟ್ಟಿಯಲ್ಲಿ ತೋರಿಸಲಾಗುತ್ತದೆ.',
+  'Product name': 'ಉತ್ಪನ್ನದ ಹೆಸರು',
+  Category: 'ವರ್ಗ',
+  'Pack size / unit': 'ಪ್ಯಾಕ್ ಗಾತ್ರ / ಘಟಕ',
+  'Selling price (₹)': 'ಮಾರಾಟದ ಬೆಲೆ (₹)',
+  'MRP (₹)': 'ಗರಿಷ್ಠ ಚಿಲ್ಲರೆ ಬೆಲೆ (₹)',
+  Description: 'ವಿವರಣೆ',
+  'Image URL (optional, HTTPS)': 'ಚಿತ್ರದ URL (ಐಚ್ಛಿಕ, HTTPS)',
+  'Take or choose a product photo': 'ಉತ್ಪನ್ನದ ಫೋಟೋ ತೆಗೆಯಿರಿ ಅಥವಾ ಆಯ್ಕೆಮಾಡಿ',
+  'On supported phones this opens the rear camera. Photos are resized before saving.': 'ಬೆಂಬಲಿತ ಫೋನ್‌ಗಳಲ್ಲಿ ಹಿಂಬದಿ ಕ್ಯಾಮೆರಾ ತೆರೆಯುತ್ತದೆ. ಉಳಿಸುವ ಮೊದಲು ಫೋಟೋ ಗಾತ್ರವನ್ನು ಬದಲಾಯಿಸಲಾಗುತ್ತದೆ.',
+  'Add product': 'ಉತ್ಪನ್ನ ಸೇರಿಸಿ',
+  'Cancel editing': 'ತಿದ್ದುಪಡಿ ರದ್ದುಮಾಡಿ',
+  'Store products': 'ಅಂಗಡಿಯ ಉತ್ಪನ್ನಗಳು',
+  Edit: 'ತಿದ್ದುಪಡಿ',
+  'Recent orders': 'ಇತ್ತೀಚಿನ ಆರ್ಡರ್‌ಗಳು',
+  Order: 'ಆರ್ಡರ್',
+  Date: 'ದಿನಾಂಕ',
+  Items: 'ವಸ್ತುಗಳು',
+  Payment: 'ಪಾವತಿ',
+  Status: 'ಸ್ಥಿತಿ',
+  'Not provided': 'ನೀಡಿಲ್ಲ',
+  'You are not logged in': 'ನೀವು ಲಾಗಿನ್ ಆಗಿಲ್ಲ',
+  'Sign in to access your account and order history.': 'ನಿಮ್ಮ ಖಾತೆ ಮತ್ತು ಆರ್ಡರ್ ಇತಿಹಾಸ ನೋಡಲು ಸೈನ್ ಇನ್ ಮಾಡಿ.',
+  'Order cancelled successfully': 'ಆರ್ಡರ್ ಯಶಸ್ವಿಯಾಗಿ ರದ್ದಾಗಿದೆ',
+  'Cancellation window expired': 'ರದ್ದತಿ ಅವಧಿ ಮುಗಿದಿದೆ',
+  'Current location selected. Add your house, street, or landmark details above if needed.': 'ಪ್ರಸ್ತುತ ಸ್ಥಳ ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ. ಬೇಕಾದರೆ ಮನೆ, ರಸ್ತೆ ಅಥವಾ ಗುರುತಿನ ಸ್ಥಳದ ವಿವರ ಸೇರಿಸಿ.',
+  'House/flat, street, landmark, city...': 'ಮನೆ/ಫ್ಲಾಟ್, ರಸ್ತೆ, ಗುರುತಿನ ಸ್ಥಳ, ನಗರ...',
+  'Unable to update cart.': 'ಕಾರ್ಟ್ ನವೀಕರಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.',
+  'Unable to load your orders.': 'ನಿಮ್ಮ ಆರ್ಡರ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.',
+  'Your admin session expired. Please sign in again.': 'ನಿರ್ವಾಹಕ ಸೆಷನ್ ಮುಗಿದಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಸೈನ್ ಇನ್ ಮಾಡಿ.',
+  'Could not load orders.': 'ಆರ್ಡರ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.',
+  'Could not load products.': 'ಉತ್ಪನ್ನಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.',
+  'Unable to cancel order.': 'ಆರ್ಡರ್ ರದ್ದುಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.',
+  'Cancellation details are not available for this order': 'ಈ ಆರ್ಡರ್‌ಗೆ ರದ್ದತಿ ವಿವರಗಳು ಲಭ್ಯವಿಲ್ಲ',
+  'Unable to connect to the backend API.': 'ಬ್ಯಾಕೆಂಡ್ APIಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.',
+  'Password must be at least 8 characters and contain uppercase, lowercase, number, and special symbol.': 'ಪಾಸ್‌ವರ್ಡ್ ಕನಿಷ್ಠ 8 ಅಕ್ಷರಗಳಿರಬೇಕು ಮತ್ತು ದೊಡ್ಡ ಅಕ್ಷರ, ಸಣ್ಣ ಅಕ್ಷರ, ಸಂಖ್ಯೆ ಹಾಗೂ ವಿಶೇಷ ಚಿಹ್ನೆ ಇರಬೇಕು.',
+  'Admin login successful': 'ನಿರ್ವಾಹಕ ಲಾಗಿನ್ ಯಶಸ್ವಿಯಾಗಿದೆ',
+  'Invalid email or password.': 'ಇಮೇಲ್ ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್ ತಪ್ಪಾಗಿದೆ.',
+  'Email and password are required.': 'ಇಮೇಲ್ ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್ ಅಗತ್ಯವಿದೆ.',
+  'Please fill all required fields': 'ದಯವಿಟ್ಟು ಅಗತ್ಯವಿರುವ ಎಲ್ಲಾ ವಿವರಗಳನ್ನು ತುಂಬಿ',
+  'Please enter a valid email address.': 'ದಯವಿಟ್ಟು ಸರಿಯಾದ ಇಮೇಲ್ ವಿಳಾಸ ನಮೂದಿಸಿ.',
+  'Please enter a valid 10-digit Indian mobile number.': 'ದಯವಿಟ್ಟು ಸರಿಯಾದ 10 ಅಂಕಿಯ ಭಾರತೀಯ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ.',
+  'User already exists': 'ಈ ಬಳಕೆದಾರರು ಈಗಾಗಲೇ ಇದ್ದಾರೆ',
+  'Login failed': 'ಲಾಗಿನ್ ವಿಫಲವಾಗಿದೆ',
+  'Registration failed': 'ನೋಂದಣಿ ವಿಫಲವಾಗಿದೆ',
+  'Google sign-in could not be loaded.': 'Google ಸೈನ್-ಇನ್ ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.',
+  'Google sign-in failed.': 'Google ಸೈನ್-ಇನ್ ವಿಫಲವಾಗಿದೆ.',
+  'Please try again.': 'ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+  'Product photo preview': 'ಉತ್ಪನ್ನದ ಫೋಟೋ ಪೂರ್ವವೀಕ್ಷಣೆ',
+  'Email is already registered.': 'ಈ ಇಮೇಲ್ ಈಗಾಗಲೇ ನೋಂದಾಯಿಸಲಾಗಿದೆ.',
+  'Phone number is already registered.': 'ಈ ಫೋನ್ ಸಂಖ್ಯೆ ಈಗಾಗಲೇ ನೋಂದಾಯಿಸಲಾಗಿದೆ.',
+  'Item': 'ವಸ್ತು',
+  'Confirmed': 'ದೃಢೀಕರಿಸಲಾಗಿದೆ',
+  'Cancelled': 'ರದ್ದಾಗಿದೆ',
+  UPI: 'ಯುಪಿಐ',
+  COD: 'ವಿತರಣೆ ವೇಳೆ ನಗದು',
+  or: 'ಅಥವಾ'
+};
+const EN_TRANSLATIONS = Object.fromEntries(
+  Object.entries(KN_TRANSLATIONS).map(([english, kannada]) => [kannada, english])
+);
+
+let googleSignInSetupPromise = null;
+let googleClientId = '';
+let googleInitialized = false;
 
 const state = {
   products: [],
@@ -24,10 +222,14 @@ function initApp() {
   const app = document.getElementById('app');
   if (!app) return;
 
+  const localeObserver = new MutationObserver(() => applyPreferredLanguage());
+  localeObserver.observe(app, { childList: true, subtree: true, characterData: true });
   renderShell();
   attachEvents();
   setRoute(getInitialRoute());
   loadProducts();
+  applyPreferredLanguage();
+  scheduleRegistrationPopup();
 }
 
 function getInitialRoute() {
@@ -49,14 +251,8 @@ function renderShell() {
           <div class="brand-mark">K</div>
           <span>Kamagere Mart</span>
         </div>
-        <div class="nav-pills">
-          <button class="nav-btn" data-route="home">Home</button>
-          <button class="nav-btn" data-route="orders">Orders</button>
-          <button class="nav-btn" data-route="auth">Login</button>
-          <button class="nav-btn" data-route="admin">Admin</button>
-          <button class="nav-btn" data-route="profile">Profile</button>
-        </div>
         <div class="topbar-actions">
+          <div class="account-menu" id="account-menu"></div>
           <button class="header-cart" data-route="cart" aria-label="cart">
             🛒
             <span class="cart-badge" id="cart-badge">0</span>
@@ -67,17 +263,72 @@ function renderShell() {
     <main id="page-content" class="page-shell"></main>
     <div id="toast" class="toast"></div>
   `;
+  updateAccountMenu();
   updateCartBadge();
+}
+
+function updateAccountMenu() {
+  const menu = document.getElementById('account-menu');
+  if (!menu) return;
+
+  const isSignedIn = Boolean(state.user || sessionStorage.getItem(ADMIN_TOKEN_KEY));
+  const links = isSignedIn
+    ? [
+        ...(state.user ? [['My profile', 'profile']] : []),
+        ['Home', 'home'],
+        ['Orders', 'orders'],
+        ['Contact', 'contact'],
+        ['FAQs', 'faqs']
+      ]
+    : [['Sign in', 'auth']];
+
+  menu.innerHTML = `
+    <button class="account-menu-toggle" type="button" data-action="toggle-account-menu" aria-expanded="false" aria-controls="account-menu-list">
+      <span class="account-menu-icon" aria-hidden="true">☰</span>
+      <span>Menu</span>
+    </button>
+    <nav class="account-menu-list" id="account-menu-list" aria-label="Account menu" hidden>
+      ${links.map(([label, route]) => `
+        <a class="account-menu-link" href="#${route}" data-route="${route}">${label}</a>
+      `).join('')}
+    </nav>
+  `;
+}
+
+function closeAccountMenu() {
+  const menu = document.getElementById('account-menu');
+  const toggle = menu?.querySelector('.account-menu-toggle');
+  const list = menu?.querySelector('.account-menu-list');
+  if (toggle && list) {
+    toggle.setAttribute('aria-expanded', 'false');
+    list.hidden = true;
+  }
 }
 
 function attachEvents() {
   const app = document.getElementById('app');
 
   app.addEventListener('click', (event) => {
+    if (event.target.classList?.contains('registration-modal-backdrop')) {
+      closeRegistrationPopup();
+      return;
+    }
+
+    const accountMenuToggle = event.target.closest('[data-action="toggle-account-menu"]');
+    if (accountMenuToggle) {
+      const list = document.getElementById('account-menu-list');
+      const isOpen = accountMenuToggle.getAttribute('aria-expanded') === 'true';
+      accountMenuToggle.setAttribute('aria-expanded', String(!isOpen));
+      if (list) list.hidden = isOpen;
+      return;
+    }
+
     const routeButton = event.target.closest('[data-route]');
     if (routeButton) {
+      if (routeButton instanceof HTMLAnchorElement) event.preventDefault();
       const route = routeButton.getAttribute('data-route');
       if (route) {
+        closeAccountMenu();
         if (route === 'cart') state.checkoutMode = 'cart';
         setRoute(route);
       }
@@ -140,13 +391,17 @@ function attachEvents() {
         logout();
       }
       if (action === 'load-login') {
+        closeRegistrationPopup();
         setRoute('auth');
       }
       if (action === 'load-register') {
         setRoute('auth', { panel: 'register' });
       }
-      if (action === 'load-admin-login') {
-        setRoute('admin');
+      if (action === 'close-registration-popup') {
+        closeRegistrationPopup();
+      }
+      if (action === 'google-not-configured') {
+        showToast(KN_TRANSLATIONS['Google sign-in is not configured yet. Set GOOGLE_CLIENT_ID on the server.']);
       }
       if (action === 'admin-logout') {
         logoutAdmin();
@@ -173,12 +428,6 @@ function attachEvents() {
     if (form.dataset.formType === 'login') {
       event.preventDefault();
       await handleLogin(form);
-      return;
-    }
-
-    if (form.dataset.formType === 'admin-login') {
-      event.preventDefault();
-      await handleAdminLogin(form);
       return;
     }
 
@@ -209,6 +458,15 @@ function attachEvents() {
 
   app.addEventListener('change', (event) => {
     const input = event.target;
+    if (input instanceof HTMLSelectElement && input.classList.contains('preferred-language')) {
+      localStorage.setItem(LANGUAGE_KEY, input.value);
+      applyPreferredLanguage();
+      app.querySelectorAll('.google-signin-slot').forEach((slot) => {
+        slot.replaceChildren();
+        delete slot.dataset.rendered;
+      });
+      setupGoogleSignIn();
+    }
     if (input instanceof HTMLInputElement && input.id === 'product-image-file') {
       handleProductImageSelection(input);
     }
@@ -225,13 +483,27 @@ function attachEvents() {
 
   window.addEventListener('hashchange', () => {
     const route = (window.location.hash || '').replace('#', '') || 'home';
-    setRoute(route);
+    if (route !== state.route) setRoute(route);
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!(event.target instanceof Element) || !event.target.closest('#account-menu')) {
+      closeAccountMenu();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeAccountMenu();
   });
 }
 
 function setRoute(route, options = {}) {
-  state.route = route;
   const target = route || 'home';
+  if (target === 'admin' && !sessionStorage.getItem(ADMIN_TOKEN_KEY)) {
+    setRoute('auth');
+    return;
+  }
+  state.route = target;
   if (target !== 'orders' && state.ordersRefreshTimer) {
     clearInterval(state.ordersRefreshTimer);
     state.ordersRefreshTimer = null;
@@ -260,16 +532,57 @@ function setRoute(route, options = {}) {
     case 'profile':
       renderProfile();
       break;
+    case 'contact':
+      renderContact();
+      break;
+    case 'faqs':
+      renderFaqs();
+      break;
     case 'admin':
-      if (sessionStorage.getItem(ADMIN_TOKEN_KEY)) {
-        renderAdminDashboard();
-      } else {
-        renderAdminLogin();
-      }
+      renderAdminDashboard();
       break;
     default:
       renderHome();
   }
+  applyPreferredLanguage();
+}
+
+function renderContact() {
+  const pageContent = document.getElementById('page-content');
+  if (!pageContent) return;
+  pageContent.innerHTML = `
+    <section class="card contact-card">
+      <h1>Contact us</h1>
+      <p>For help with shopping or orders, call our store:</p>
+      <a class="primary-btn contact-phone" href="tel:+9100000000">91+ 0000000000</a>
+    </section>
+  `;
+}
+
+function renderFaqs() {
+  const pageContent = document.getElementById('page-content');
+  if (!pageContent) return;
+  pageContent.innerHTML = `
+    <section class="card faq-card">
+      <h1>Frequently asked questions</h1>
+      <details>
+        <summary>How do I place an order?</summary>
+        <p>Add items to your cart, then continue to checkout and submit your delivery details.</p>
+      </details>
+      <details>
+        <summary>What payment methods are available?</summary>
+        <p>Choose Cash on Delivery or UPI at checkout.</p>
+      </details>
+      <details>
+        <summary>Can I cancel an order?</summary>
+        <p>You can cancel a confirmed order from Orders within two minutes after placing it.</p>
+      </details>
+      <details>
+        <summary>How much is delivery?</summary>
+        <p>Delivery is free for orders above ₹99; otherwise the fee is ₹25.</p>
+      </details>
+    </section>
+  `;
 }
 
 function renderHome() {
@@ -523,39 +836,60 @@ function renderAuth(panel = 'login') {
   const pageContent = document.getElementById('page-content');
   if (!pageContent) return;
 
-  const isLogin = panel === 'login';
+  pageContent.innerHTML = authMarkup(panel);
+  applyPreferredLanguage();
+  setupGoogleSignIn();
+}
 
-  pageContent.innerHTML = `
+function authMarkup(panel = 'login', idPrefix = '') {
+  const isLogin = panel === 'login';
+  const fieldId = (id) => `${idPrefix}${id}`;
+  return `
+    ${!isLogin ? `
+      <div class="auth-language">
+        <label for="${fieldId('preferred-language')}">Preferred language</label>
+        <select id="${fieldId('preferred-language')}" class="preferred-language" aria-label="Preferred language">
+          <option value="en">English</option>
+          <option value="kn">ಕನ್ನಡ</option>
+        </select>
+      </div>
+    ` : ''}
     <div class="auth-grid">
       <div class="auth-panel">
         <h3>${isLogin ? 'Login' : 'Create account'}</h3>
         <form data-form-type="${isLogin ? 'login' : 'register'}">
           ${!isLogin ? `
             <div>
-              <label for="name">Full name</label>
-              <input id="name" name="name" required />
+              <label for="${fieldId('name')}">Full name</label>
+              <input id="${fieldId('name')}" name="name" required />
             </div>
           ` : ''}
 
           <div style="margin-top: 12px;">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" required />
+            <label for="${fieldId('email')}">Email</label>
+            <input id="${fieldId('email')}" name="email" type="email" required />
           </div>
 
           ${!isLogin ? `
             <div style="margin-top: 12px;">
-              <label for="phone">Phone</label>
-              <input id="phone" name="phone" type="tel" required />
+              <label for="${fieldId('phone')}">Phone</label>
+              <input id="${fieldId('phone')}" name="phone" type="tel" required />
             </div>
           ` : ''}
 
           <div style="margin-top: 12px;">
-            <label for="password">Password</label>
-            <input id="password" name="password" type="password" required />
+            <label for="${fieldId('password')}">Password</label>
+            <input id="${fieldId('password')}" name="password" type="password" required />
           </div>
 
           <button type="submit" class="primary-btn" style="margin-top:16px; width:100%;">
             ${isLogin ? 'Login' : 'Register'}
+          </button>
+          <div class="auth-divider"><span>or</span></div>
+          <div class="google-signin-slot" aria-label="Sign in with Google"></div>
+          <button type="button" class="google-signin-fallback" data-action="google-not-configured" hidden>
+            <span class="google-mark" aria-hidden="true">G</span>
+            <span>Continue with Google</span>
           </button>
         </form>
       </div>
@@ -573,35 +907,187 @@ function renderAuth(panel = 'login') {
         <button class="secondary-btn" data-action="${isLogin ? 'load-register' : 'load-login'}" style="margin-top: 12px; width:100%;">
           ${isLogin ? 'Need an account? Register' : 'Already a member? Login'}
         </button>
-        ${isLogin ? '<button class="outline-btn" data-action="load-admin-login" style="margin-top: 12px; width:100%;">Admin sign in</button>' : ''}
       </div>
     </div>
   `;
 }
 
-function renderAdminLogin(errorMessage = '') {
-  const pageContent = document.getElementById('page-content');
-  if (!pageContent) return;
+function scheduleRegistrationPopup() {
+  window.setTimeout(() => {
+    if (
+      state.user ||
+      sessionStorage.getItem(ADMIN_TOKEN_KEY) ||
+      sessionStorage.getItem(REGISTRATION_PROMPT_KEY)
+    ) return;
+    sessionStorage.setItem(REGISTRATION_PROMPT_KEY, '1');
+    showRegistrationPopup();
+  }, 10000);
+}
 
-  pageContent.innerHTML = `
-    <div class="admin-login card">
-      <h2>Admin sign in</h2>
-      <p>Sign in with your administrator account to manage store orders.</p>
-      ${errorMessage ? `<p class="admin-error" role="alert">${escapeHtml(errorMessage)}</p>` : ''}
-      <form data-form-type="admin-login" class="form-grid">
-        <div>
-          <label for="admin-email">Admin email</label>
-          <input id="admin-email" name="email" type="email" autocomplete="username" required />
-        </div>
-        <div>
-          <label for="admin-password">Password</label>
-          <input id="admin-password" name="password" type="password" autocomplete="current-password" required />
-        </div>
-        <button type="submit" class="primary-btn">Sign in</button>
-        <button type="button" class="outline-btn" data-route="home">Back to store</button>
-      </form>
-    </div>
+function showRegistrationPopup() {
+  if (document.getElementById('registration-modal') || state.user) return;
+  const modal = document.createElement('div');
+  modal.id = 'registration-modal';
+  modal.className = 'registration-modal-backdrop';
+  modal.innerHTML = `
+    <section class="registration-modal" role="dialog" aria-modal="true" aria-labelledby="registration-modal-title">
+      <button class="modal-close" type="button" data-action="close-registration-popup" aria-label="Close">×</button>
+      <h2 id="registration-modal-title">Create your account</h2>
+      <p>Register for a Kamagere Mart account</p>
+      ${authMarkup('register', 'popup-')}
+    </section>
   `;
+  document.getElementById('app')?.appendChild(modal);
+  applyPreferredLanguage();
+  setupGoogleSignIn();
+  modal.querySelector('input[name="name"]')?.focus();
+}
+
+function closeRegistrationPopup() {
+  document.getElementById('registration-modal')?.remove();
+}
+
+function translateAppText(text, language) {
+  if (language === 'en') {
+    if (EN_TRANSLATIONS[text]) return EN_TRANSLATIONS[text];
+    const order = text.match(/^ಆರ್ಡರ್ (.+)$/);
+    if (order) return `Order ${order[1]}`;
+    const discount = text.match(/^(\d+)% ರಿಯಾಯಿತಿ$/);
+    if (discount) return `${discount[1]}% OFF`;
+    const cancellation = text.match(/^ರದ್ದುಮಾಡಲು ಲಭ್ಯವಿರುವ ಸಮಯ (.+)$/);
+    if (cancellation) return `Cancel available for ${cancellation[1]}`;
+    const addItem = text.match(/^(.+) ಸೇರಿಸಿ$/);
+    if (addItem) return `Add one ${addItem[1]}`;
+    const removeItem = text.match(/^(.+) ತೆಗೆದುಹಾಕಿ$/);
+    if (removeItem) return `Remove one ${removeItem[1]}`;
+    return undefined;
+  }
+  if (KN_TRANSLATIONS[text]) return KN_TRANSLATIONS[text];
+
+  const discount = text.match(/^(\d+)% OFF$/);
+  if (discount) return `${discount[1]}% ರಿಯಾಯಿತಿ`;
+  const order = text.match(/^Order (.+)$/);
+  if (order) return `ಆರ್ಡರ್ ${order[1]}`;
+  const cancellation = text.match(/^Cancel available for (.+)$/);
+  if (cancellation) return `ರದ್ದುಮಾಡಲು ಲಭ್ಯವಿರುವ ಸಮಯ ${cancellation[1]}`;
+  const addItem = text.match(/^Add one (.+)$/);
+  if (addItem) return `${addItem[1]} ಸೇರಿಸಿ`;
+  const removeItem = text.match(/^Remove one (.+)$/);
+  if (removeItem) return `${removeItem[1]} ತೆಗೆದುಹಾಕಿ`;
+  return undefined;
+}
+
+function applyPreferredLanguage() {
+  const language = localStorage.getItem(LANGUAGE_KEY) === 'kn' ? 'kn' : 'en';
+  document.documentElement.lang = language;
+  document.title = language === 'kn'
+    ? 'ಕಾಮಗೆರೆ ಮಾರ್ಟ್ — ತಾಜಾ ಅಗತ್ಯ ವಸ್ತುಗಳು ಮನೆಗೆ'
+    : 'Kamagere Mart — Fresh essentials delivered';
+  const app = document.getElementById('app');
+  if (app) {
+    const walker = document.createTreeWalker(app, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      const original = node.nodeValue.trim();
+      if (!original) continue;
+      const translated = translateAppText(original, language);
+      if (translated) {
+        const leading = node.nodeValue.match(/^\s*/)?.[0] || '';
+        const trailing = node.nodeValue.match(/\s*$/)?.[0] || '';
+        node.nodeValue = `${leading}${translated}${trailing}`;
+      }
+    }
+    for (const element of app.querySelectorAll('[placeholder], [aria-label], [title], [alt]')) {
+      for (const attribute of ['placeholder', 'aria-label', 'title', 'alt']) {
+        const value = element.getAttribute(attribute);
+        if (!value) continue;
+        const translated = translateAppText(value, language);
+        if (translated) element.setAttribute(attribute, translated);
+      }
+    }
+    for (const selector of app.querySelectorAll('.preferred-language')) selector.value = language;
+  }
+}
+
+async function setupGoogleSignIn() {
+  const slots = [...document.querySelectorAll('.google-signin-slot')];
+  if (!slots.length) return;
+  const fallbacks = [...document.querySelectorAll('.google-signin-fallback')];
+
+  if (!googleSignInSetupPromise) {
+    googleSignInSetupPromise = (async () => {
+      const response = await fetch(`${API_BASE}/api/auth/google/config`);
+      const config = await response.json();
+      googleClientId = config.clientId || '';
+      if (!googleClientId) return;
+
+      if (!window.google?.accounts?.id) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://accounts.google.com/gsi/client';
+          script.async = true;
+          script.defer = true;
+          script.onload = resolve;
+          script.onerror = () => reject(new Error('Google sign-in could not be loaded.'));
+          document.head.appendChild(script);
+        });
+      }
+      if (!googleInitialized) {
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: handleGoogleCredential
+        });
+        googleInitialized = true;
+      }
+    })().catch((error) => {
+      console.error('Unable to initialize Google sign-in:', error);
+      googleSignInSetupPromise = null;
+      throw error;
+    });
+  }
+
+  try {
+    await googleSignInSetupPromise;
+    if (!googleClientId) {
+      fallbacks.forEach((button) => { button.hidden = false; });
+      return;
+    }
+    slots.forEach((slot) => {
+      if (!slot.isConnected || slot.dataset.rendered === 'true') return;
+      window.google.accounts.id.renderButton(slot, {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        text: 'continue_with',
+        shape: 'rectangular',
+        locale: localStorage.getItem(LANGUAGE_KEY) === 'kn' ? 'kn' : 'en',
+        width: Math.min(340, slot.parentElement?.clientWidth || 340)
+      });
+      slot.dataset.rendered = 'true';
+    });
+  } catch {
+    fallbacks.forEach((button) => { button.hidden = false; });
+    showToast('Google sign-in could not be loaded.');
+  }
+}
+
+async function handleGoogleCredential(response) {
+  try {
+    const resultResponse = await fetch(`${API_BASE}/api/auth/google`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: response.credential })
+    });
+    const result = await resultResponse.json();
+    if (!resultResponse.ok) throw new Error(result.message || 'Google sign-in failed.');
+    state.user = result.user;
+    saveUser(result.user);
+    closeRegistrationPopup();
+    showToast('Login successful');
+    setRoute('profile');
+  } catch (error) {
+    showToast(error.message || 'Google sign-in failed.');
+  }
 }
 
 async function renderAdminDashboard() {
@@ -611,7 +1097,7 @@ async function renderAdminDashboard() {
   pageContent.innerHTML = '<div class="card"><p>Loading admin dashboard…</p></div>';
   const token = sessionStorage.getItem(ADMIN_TOKEN_KEY);
   if (!token) {
-    renderAdminLogin();
+    setRoute('auth');
     return;
   }
 
@@ -626,7 +1112,7 @@ async function renderAdminDashboard() {
 
     if (ordersResponse.status === 401 || ordersResponse.status === 403) {
       logoutAdmin(false);
-      renderAdminLogin('Your admin session expired. Please sign in again.');
+      showToast('Your admin session expired. Please sign in again.');
       return;
     }
     if (!ordersResponse.ok) {
@@ -915,42 +1401,36 @@ async function handleLogin(form) {
     const result = await response.json();
 
     if (!response.ok) {
+      if (response.status === 401) {
+        const adminResponse = await fetch(`${API_BASE}/api/admin/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const adminResult = await adminResponse.json();
+        if (adminResponse.ok && adminResult.token && adminResult.admin?.role === 'admin') {
+          sessionStorage.setItem(ADMIN_TOKEN_KEY, adminResult.token);
+          sessionStorage.setItem(ADMIN_EMAIL_KEY, adminResult.admin.email);
+          localStorage.removeItem(USER_KEY);
+          state.user = null;
+          updateAccountMenu();
+          closeRegistrationPopup();
+          showToast('Admin login successful');
+          setRoute('admin');
+          return;
+        }
+      }
       throw new Error(result.message || 'Login failed');
     }
 
     state.user = result.user;
     saveUser(result.user);
+    closeRegistrationPopup();
+    updateAccountMenu();
     showToast('Login successful');
     setTimeout(() => setRoute('profile'), 500);
   } catch (error) {
     showToast(error.message || 'Login failed');
-  }
-}
-
-async function handleAdminLogin(form) {
-  const payload = Object.fromEntries(new FormData(form).entries());
-
-  try {
-    const response = await fetch(`${API_BASE}/api/admin/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || 'Admin login failed');
-    }
-    if (!result.token || result.admin?.role !== 'admin') {
-      throw new Error('The server returned an invalid admin session.');
-    }
-
-    sessionStorage.setItem(ADMIN_TOKEN_KEY, result.token);
-    sessionStorage.setItem(ADMIN_EMAIL_KEY, result.admin.email);
-    showToast('Admin login successful');
-    setRoute('admin');
-  } catch (error) {
-    renderAdminLogin(error.message || 'Admin login failed');
   }
 }
 
@@ -979,7 +1459,7 @@ async function handleAddProduct(form) {
 
     if (response.status === 401 || response.status === 403) {
       logoutAdmin(false);
-      renderAdminLogin('Your admin session expired. Please sign in again.');
+      showToast('Your admin session expired. Please sign in again.');
       return;
     }
     if (!response.ok) {
@@ -1112,6 +1592,7 @@ function showProductImageError(form, message) {
 
 async function handleRegister(form) {
   const payload = Object.fromEntries(new FormData(form).entries());
+  const isPopup = Boolean(form.closest('#registration-modal'));
 
   try {
     const response = await fetch(`${API_BASE}/api/register`, {
@@ -1126,7 +1607,12 @@ async function handleRegister(form) {
     }
 
     showToast('Registration successful');
-    renderAuth('login');
+    if (isPopup) {
+      closeRegistrationPopup();
+      setRoute('auth');
+    } else {
+      renderAuth('login');
+    }
   } catch (error) {
     showToast(error.message || 'Registration failed');
   }
@@ -1337,6 +1823,7 @@ function loadCart() {
 
 function saveUser(user) {
   localStorage.setItem(USER_KEY, JSON.stringify(user));
+  updateAccountMenu();
 }
 
 function loadUser() {
@@ -1358,6 +1845,7 @@ function loadOrders() {
 function logout() {
   localStorage.removeItem(USER_KEY);
   state.user = null;
+  updateAccountMenu();
   renderProfile();
   showToast('Logged out');
 }
@@ -1365,8 +1853,9 @@ function logout() {
 function logoutAdmin(showMessage = true) {
   sessionStorage.removeItem(ADMIN_TOKEN_KEY);
   sessionStorage.removeItem(ADMIN_EMAIL_KEY);
+  updateAccountMenu();
   if (state.route === 'admin') {
-    renderAdminLogin();
+    setRoute('auth');
   }
   if (showMessage) showToast('Admin signed out');
 }
